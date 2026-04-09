@@ -1,0 +1,319 @@
+{% extends "common/base.html" %}
+
+{% block content %}
+<!-- Botão que abre o modal -->
+<div class="d-flex flex-wrap justify-content-center gap-2 py-3" role="group">
+    <!-- Botões de Atalho -->
+    <a class="btn btn-outline-primary rounded-pill" href="#file">Arquivo</a>
+    <a class="btn btn-outline-primary rounded-pill" href="#widgets">Widgets</a>
+    <a class="btn btn-outline-primary rounded-pill" href="#preview">Preview</a>
+    <a class="btn btn-outline-primary rounded-pill" href="#nulls">Nulos</a>
+    <a class="btn btn-outline-primary rounded-pill" href="#duplicates">Duplicados</a>
+    <a class="btn btn-outline-primary rounded-pill" href="#outliers">Outliers</a>
+</div>
+    
+<!-- UPLOAD -->
+<div class="card shadow-sm text-center rounded-4 p-4 mb-3">
+    <i class="bi bi-cloud-upload fs-2 text-primary"></i>
+    <h1 class="h4 mt-2">Solte seu arquivo aqui</h1>
+
+    <p class="small">csv, db, json, txt, xls, xlsx</p>
+
+    <button class="btn btn-primary">
+        <i class="bi bi-folder2-open me-1"></i>Selecionar arquivo
+    </button>
+
+    <span class="text-info small d-block mt-2">
+        <i class="bi bi-file-check"></i> Arquivo.ext
+    </span>
+
+    <input type="file" class="d-none" id="fileInput"
+        accept=".csv,.db,.json,.txt,.xls,.xlsx">
+</div>
+
+<!-- ARQUIVO -->
+<div class="d-flex gap-2 mb-3" id="file">
+    <div class="card flex-fill">
+
+        <div class="card-header bg-secondary-subtle">
+            <span>
+                <i class="bi bi-file-earmark text-secondary"></i> <span class="fw-semibold">Arquivo</span>
+            </span>
+        </div>
+
+        <!-- SELECT DATASET -->
+        <div class="p-2 border-bottom">
+            <label class="form-label small mb-1">
+                <i class="bi bi-table"></i> Tabela
+            </label>
+            <select id="tableSelect" class="form-select form-select-sm"></select>
+        </div>
+
+        <!-- COLUMN SELECTOR -->
+        <div class="p-2">
+
+            <label class="form-label small mb-2">
+                <i class="bi bi-columns-gap"></i> Selecionar Colunas
+            </label>
+
+            <!-- AÇÕES GLOBAIS -->
+            <div class="d-flex gap-1 mb-2">
+                <button id="selectAllBtn" class="btn btn-outline-success btn-sm w-100" type="button">
+                    Selecionar Todas
+                </button>
+
+                <button id="clearBtn" class="btn btn-outline-danger btn-sm w-100" type="button">
+                    Limpar
+                </button>
+            </div>
+
+            <!-- LISTA DE COLUNAS -->
+            <div id="columnSelector" class="d-flex flex-wrap btn-group">
+
+                <input type="checkbox" class="btn-check" id="col1">
+                <label class="btn btn-outline-secondary btn-sm" for="col1">coluna</label>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WIDGETS -->
+<div class="row g-2 text-center mb-3" id="widgets"> 
+    <div class="col"><div class="card p-2"><span class="text-primary"><i class="bi bi-grid-3x3"></i><br>Dimensão<br><strong id="w-dim">-</strong></span></div></div>
+    <div class="col"><div class="card p-2"><span class="text-danger"><i class="bi bi-database-exclamation"></i><br>Nulos<br><strong id="w-null">-</strong></span></div></div>
+    <div class="col"><div class="card p-2"><span class="text-warning"><i class="bi bi-copy"></i><br>Duplicatas<br><strong id="w-dup">-</strong></span></div></div>
+    <div class="col"><div class="card p-2"><span class="text-success"><i class="bi bi-bar-chart"></i><br>Outliers<br><strong id="w-out">-</strong></span></div></div>
+</div>
+
+<!-- DATA PREVIEW -->
+<div class="row g-2 mb-3" id="preview">
+    <!-- TABELA -->
+    <div class="col-12 col-lg-9">
+        <div class="card h-100">  <!-- Adicionado card e h-100 -->
+            <div class="card-header bg-primary-subtle">
+                <i class="bi bi-grid-3x3 text-primary"></i> 
+                <span class="fw-semibold">Preview</span>
+            </div>
+            <div class="card-body p-0 overflow-auto">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead id="previewHeader"></thead>
+                        <tbody id="previewBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATA TYPES -->
+    <div class="col-12 col-lg-3">
+        <div class="card h-100">
+            <div class="card-header bg-primary-subtle">
+                <i class="bi bi-type text-primary"></i>  <!-- Ícone mais apropriado -->
+                <span class="fw-semibold">Tipos</span>
+            </div>
+            <div class="card-body p-0 overflow-auto" style="max-height: 500px;">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Coluna</th>
+                                <th>Tipo</th>
+                                <th>Exemplo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dtypesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== NULLS ===================== -->
+<div class="row g-2 mb-3" id="nulls">
+    <!-- TABELA -->
+    <div class="col-12 col-lg-9">
+        <div class="card h-100">
+            <div class="card-header bg-danger-subtle">
+                <i class="bi bi-database-exclamation text-danger"></i>
+                <span class="fw-semibold">Nulos</span>
+            </div>
+
+            <div class="table-responsive obert">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr><th>Coluna</th><th>Nulos</th><th>%</th></tr>
+                    </thead>
+                    <tbody id="nullsDetailBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="col-12 col-lg-3">
+        <div class="card h-100">
+
+            <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                <i class="bi bi-database-exclamation text-danger"></i>
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-danger btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                        Coluna
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item">Todas</button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item">Coluna A</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-body d-flex flex-column gap-2">
+
+                <span class="text-warning small"><i class="bi bi-pencil"></i> Imputação</span>
+                <div class="input-group input-group-sm">
+                    <input class="form-control border-warning" placeholder="Valor">
+                    <button class="btn btn-outline-warning">OK</button>
+                </div>
+
+                <div class="d-flex gap-1">
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Moda</button>
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Média</button>
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Mediana</button>
+                </div>
+
+                <span class="text-danger small"><i class="bi bi-trash"></i> Remoção</span>
+                <button class="btn btn-danger btn-sm">Remover Linhas</button>
+                <button class="btn btn-outline-danger btn-sm">Remover Coluna</button>
+
+                <span class="text-success small"><i class="bi bi-check-circle"></i> Manter</span>
+                <button class="btn btn-outline-success btn-sm">Ignorar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== DUPLICATES ===================== -->
+<div class="row g-2 mb-3" id="duplicates">
+
+    <div class="col-12 col-lg-9">
+        <div class="card h-100">
+            <div class="card-header bg-warning-subtle">
+                <i class="bi bi-copy text-warning"></i>
+                <span class="fw-semibold">Duplicatas</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr><th>Coluna</th><th>Duplicatas</th><th>%</th></tr>
+                    </thead>
+                    <tbody id="duplicatesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="card h-100">
+
+            <div class="card-header bg-warning-subtle d-flex justify-content-between align-items-center">
+                <i class="bi bi-copy text-warning"></i>
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-warning btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                        Coluna
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item">Todas</button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item">Coluna A</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-body d-flex flex-column gap-2">
+
+                <span class="text-warning small"><i class="bi bi-pencil"></i> Imputação</span>
+                <div class="input-group input-group-sm">
+                    <input class="form-control border-warning" placeholder="Valor">
+                    <button class="btn btn-outline-warning">OK</button>
+                </div>
+
+                <span class="text-danger small"><i class="bi bi-trash"></i> Remoção</span>
+                <button class="btn btn-danger btn-sm">Remover Linhas</button>
+                <button class="btn btn-outline-danger btn-sm">Remover Coluna</button>
+
+                <span class="text-success small"><i class="bi bi-check-circle"></i> Manter</span>
+                <button class="btn btn-outline-success btn-sm">Ignorar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== OUTLIERS ===================== -->
+<div class="row g-2 mb-3" id="outliers">
+
+    <div class="col-12 col-lg-9">
+        <div class="card h-100">
+            <div class="card-header bg-success-subtle">
+                <i class="bi bi-bar-chart text-success"></i>
+                <span class="fw-semibold">Outliers</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead id="outliersHeader"></thead>
+                    <tbody id="outliersBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="card h-100">
+
+            <div class="card-header bg-success-subtle d-flex justify-content-between align-items-center">
+                <i class="bi bi-bar-chart text-success"></i>
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                        Coluna
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item">Todas</button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item">Coluna A</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-body d-flex flex-column gap-2">
+
+                <span class="text-warning small"><i class="bi bi-pencil"></i> Imputação</span>
+                <div class="input-group input-group-sm">
+                    <input class="form-control border-warning" placeholder="Valor">
+                    <button class="btn btn-outline-warning">OK</button>
+                </div>
+
+                <div class="d-flex gap-1">
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Moda</button>
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Média</button>
+                    <button class="btn btn-outline-warning btn-sm flex-fill">Mediana</button>
+                </div>
+
+                <span class="text-danger small"><i class="bi bi-trash"></i> Remoção</span>
+                <button class="btn btn-danger btn-sm">Remover Linhas</button>
+                <button class="btn btn-outline-danger btn-sm">Remover Coluna</button>
+
+                <span class="text-success small"><i class="bi bi-check-circle"></i> Manter</span>
+                <button class="btn btn-outline-success btn-sm">Ignorar</button>
+            </div> 
+        </div>
+    </div>
+</div>
+
+{% endblock %}

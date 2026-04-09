@@ -1,0 +1,36 @@
+<header class="d-flex justify-content-between align-items-center px-2 py-2 border-bottom">
+
+        <span class="fw-semibold">EDA Speeder</span>
+
+        <div class="col-6">
+            <button class="btn btn-sm w-100 bg-secondary-subtle border-primary-subtle shadow text-start text-secondary" data-bs-toggle="modal" data-bs-target="#searchModal">
+                <i class="bi bi-search"></i> Buscar...
+            </button>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button onclick="window.open('https://github.com/NycolasGarcia', '_blank')" class="btn btn-sm border-0">
+                <i class="bi bi-github"></i>
+            </button>
+
+            <button id="theme_toggle" class="btn btn-sm border-0">
+                <i class="bi bi-moon"></i>
+            </button>
+
+            <button onclick="windowControls('minimize')" class="btn btn-sm border-0">
+                <i class="bi bi-dash-lg"></i>
+            </button>
+
+            <button onclick="windowControls('maximize')" class="btn btn-sm border-0">
+                <i class="bi bi-square"></i>
+            </button>
+
+            <button onclick="windowControls('close')" class="btn btn-sm border-0">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+        </div>
+    </header>
+
+<script src="static/js/theme-toggle.js"></script>

@@ -1,0 +1,63 @@
+<div class="modal fade" id="drag-drop-error" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <h5 class="modal-title text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Extensão não suportada
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    O <strong>EDA Speeder</strong> aceita apenas:
+                </p>
+
+                <!-- EXTENSÕES -->
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                    <span class="badge bg-light text-dark border">.csv</span>
+                    <span class="badge bg-light text-dark border">.db</span>
+                    <span class="badge bg-light text-dark border">.json</span>
+                    <span class="badge bg-light text-dark border">.txt</span>
+                    <span class="badge bg-light text-dark border">.xls</span>
+                    <span class="badge bg-light text-dark border">.xlsx</span>
+                </div>
+
+                <!-- ERRO -->
+                <p class="mb-3">
+                    O arquivo 
+                    <strong class="text-danger" id="invalidFileName">{file.name}</strong> 
+                    não é suportado.
+                </p>
+
+                <!-- CONTATO -->
+                <p class="small text-muted mb-0">
+                    Problema inesperado? 
+                    <spam><a href="https://github.com/NycolasGarcia/EDA-Speeder/issues/new?template=bug_report.md" target="_blank">
+                        <i class="bi bi-github"></i>
+                        GitHub
+                    </a></spam>
+                    ou
+                    <spam><a href="mailto:nycolasagrg.work@gmail.com" target="_blank">
+                        <i class="bi bi-envelope"></i>
+                        nycolasagrg.work@gmail.com
+                    </a></spam>
+                </p>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button class="btn btn-primary w-100" data-bs-dismiss="modal">
+                    Ok, entendi
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
