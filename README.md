@@ -201,7 +201,7 @@ EDA-Speeder/
 └── requirements.txt
 ```
 
-## 📬 Contato
+## Contato
 
 <div align="center">
 
