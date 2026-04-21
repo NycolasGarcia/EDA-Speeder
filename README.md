@@ -4,6 +4,8 @@
 
 Ferramenta leve e prática de *Análise de Dados Exploratória* e *Preparação de Dados*.
 
+<img src="static/imgs/preview-image.png" width="600">
+
 [Funcionalidades](#funcionalidades) | [Instalação](#instalação) | [Nosso Workflow](#nosso-workflow)
 
 Ferramentas:
