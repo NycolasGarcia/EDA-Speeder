@@ -125,20 +125,15 @@ graph LR
 
 
 ## Stack
+
+
 <div align="center">
-<table>
-<tr>
-<th>Back-end</th>
-<th>Flask + PyWebView</th>
-</tr>
-<tr>
-<th>Front-end</th>
-<th>Bootstrap + Bootstrap Icons</th>
-</tr>
-<th>Data Handling</th>
-<th>Pandas + Plotly.Express</th>
-</table>
-</div>
+
+  |Camada|Ferramentas|
+  |-|-|
+  |Back-End|Flask + PyWebView|
+  |Front-End|Bootstrap + Bootstrap Icons|
+  |Data-Handling|Pandas + Plotly.Express|
 
 ## Instalação
 ```bash
