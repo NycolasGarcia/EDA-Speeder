@@ -135,6 +135,8 @@ graph LR
   |Front-End|Bootstrap + Bootstrap Icons|
   |Data-Handling|Pandas + Plotly.Express|
 
+</div>
+
 ## Instalação
 ```bash
 # Clone o repositório
