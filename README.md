@@ -113,12 +113,16 @@ graph LR
   - [ ] txt
   - [x] xls
   - [x] xlsx
+  - [x] xlsr
 - [x] Preview de dados
   - [x] widgets
   - [x] preview
-  - [ ] nulls
-  - [ ] dupes
-  - [ ] outliers 
+  - [x] nulls
+  - [x] dupes
+  - [ ] outliers
+- [x] Sidebar
+  - [x] Sidebar com arquivos salvos
+  - [x] Acessar, Editar, Excluir arquivos
 - [ ] Tratamento básico de dados
 - [ ] Visualizações interativas
 - [ ] Exportação de relatórios
