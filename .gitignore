@@ -5,3 +5,6 @@ __pycache__/
 
 # Virtual environment
 venv/
+
+# Arquivos de upload não devem ser versionados, mas a pasta sim
+/uploads/*

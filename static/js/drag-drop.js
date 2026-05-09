@@ -3,12 +3,12 @@
 // Retorna: dispara evento customizado com arquivo válido
 
 document.addEventListener('DOMContentLoaded', function () {
-    const card = document.querySelector('.card');
+    const card = document.getElementById('upload-card');
     const fileInput = document.getElementById('fileInput');
     const button = card.querySelector('button');
     const fileNameSpan = card.querySelector('span');
 
-    const allowedExtensions = ['csv', 'db', 'json', 'txt', 'xls', 'xlsx'];
+    const allowedExtensions = ['csv', 'db', 'json', 'txt', 'xls', 'xlsx', 'ods'];
 
     // 🔹 Reset visual do card
     function resetCardStyle() {
