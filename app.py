@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import webview
 
-from routes import upload_bp, df_bp, files_bp, prep_bp
+from routes import upload_bp, df_bp, files_bp, nulls_bp
 from services import data_manager
 
 app = Flask(__name__, static_folder='./static', template_folder='./templates')
@@ -9,7 +9,7 @@ app = Flask(__name__, static_folder='./static', template_folder='./templates')
 app.register_blueprint(upload_bp)
 app.register_blueprint(df_bp)
 app.register_blueprint(files_bp)
-app.register_blueprint(prep_bp)
+app.register_blueprint(nulls_bp)
 
 
 @app.route('/')

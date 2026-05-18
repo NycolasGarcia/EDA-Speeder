@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 });
 
+// ── Estado do painel de nulos ─────────────────────────────────────────────────
+let _currentNullCol = null;
+const _ignoredNullCols = new Set();
+
 function getHeaderRow() {
     const el = document.getElementById('headerRow');
     return el ? (parseInt(el.value) || 0) : 0;
@@ -151,6 +155,8 @@ function createDF() {
         if (data.reset_warning) {
             new bootstrap.Modal(document.getElementById('file-df-modal')).show();
         }
+        _ignoredNullCols.clear();
+        _currentNullCol = null;
         updateMetrics(data.metrics);
         renderPreview(data.preview);
         renderDtypes(data.dtypes);
@@ -166,7 +172,10 @@ function clearAllRenders() {
     document.getElementById('w-out').textContent  = '-';
     ['previewHeader', 'previewBody', 'dtypesBody',
      'nullsDetailBody', 'duplicatesHeader', 'duplicatesBody'
-    ].forEach(id => { document.getElementById(id).innerHTML = ''; });
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
 }
 
 
@@ -323,8 +332,12 @@ function castColumn(column, dtype, badgeEl, menuEl) {
                     data.new_dtype.startsWith(item.textContent.split(' ')[0])
                 );
             });
+            if (data.metrics)      updateMetrics(data.metrics);
+            if (data.nulls_detail) renderNullsDetail(data.nulls_detail);
+            document.dispatchEvent(new CustomEvent('dtype:changed', {
+                detail: { column, newDtype: data.new_dtype }
+            }));
         } else {
-            // Pisca vermelho por 3s para indicar erro
             badgeEl.classList.replace('bg-secondary', 'bg-danger');
             setTimeout(() => badgeEl.classList.replace('bg-danger', 'bg-secondary'), 3000);
         }
@@ -342,6 +355,7 @@ function renderNullsDetail(nulls) {
     if (!nulls || !nulls.length) {
         body.innerHTML = '<tr><td colspan="3" class="text-center text-success small py-2">'
             + '<i class="bi bi-check-circle me-1"></i>Nenhum nulo encontrado</td></tr>';
+        populateNullDropdown([]);
         return;
     }
 
@@ -350,6 +364,8 @@ function renderNullsDetail(nulls) {
         tr.innerHTML = `<td>${row.column}</td><td>${row.count}</td><td>${row.pct}%</td>`;
         body.appendChild(tr);
     });
+
+    populateNullDropdown(nulls);
 }
 
 
@@ -359,6 +375,7 @@ function renderNullsDetail(nulls) {
 function renderDupsDetail(dups) {
     const header = document.getElementById('duplicatesHeader');
     const body   = document.getElementById('duplicatesBody');
+    if (!header || !body) return;
     header.innerHTML = body.innerHTML = '';
 
     if (!dups || !dups.rows.length) {
@@ -385,3 +402,221 @@ function renderDupsDetail(dups) {
         body.appendChild(tr);
     });
 }
+
+
+// ===============================
+// BLOCO 12: Painel de ação — Nulos
+// ===============================
+
+function showSuccessToast(msg) {
+    const el = document.getElementById('successToast');
+    if (!el) return;
+    document.getElementById('successToastMsg').textContent = msg;
+    bootstrap.Toast.getOrCreateInstance(el, { delay: 3000 }).show();
+}
+
+function showErrorToast(msg) {
+    const el = document.getElementById('errorToast');
+    if (!el) return;
+    document.getElementById('errorToastMsg').textContent = msg || 'Erro inesperado.';
+    bootstrap.Toast.getOrCreateInstance(el, { autohide: false }).show();
+}
+
+function resetNullPanel() {
+    _currentNullCol  = null;
+    window._nullColStats = null;
+
+    const btn = document.getElementById('nullColDropdownBtn');
+    if (btn) btn.textContent = 'Selecionar coluna';
+
+    const info = document.getElementById('nullColInfo');
+    if (info) info.classList.add('d-none');
+
+    const input = document.getElementById('nullImputeValue');
+    if (input) { input.value = ''; input.disabled = true; }
+
+    ['nullBtnOk','nullBtnModa','nullBtnMedia','nullBtnMediana',
+     'nullBtnDropRows','nullBtnDropCol','nullBtnIgnore']
+    .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+    });
+}
+
+function enableNullButtons(stats) {
+    document.getElementById('nullImputeValue').disabled  = false;
+    document.getElementById('nullBtnOk').disabled        = false;
+    document.getElementById('nullBtnModa').disabled      = stats.mode   === null;
+    document.getElementById('nullBtnMedia').disabled     = stats.mean   === null;
+    document.getElementById('nullBtnMediana').disabled   = stats.median === null;
+    document.getElementById('nullBtnDropRows').disabled  = false;
+    document.getElementById('nullBtnDropCol').disabled   = false;
+    document.getElementById('nullBtnIgnore').disabled    = false;
+}
+
+function populateNullDropdown(nulls) {
+    const menu = document.getElementById('nullColDropdownMenu');
+    if (!menu) return;
+
+    menu.innerHTML = '';
+    const visible = nulls.filter(n => !_ignoredNullCols.has(n.column));
+
+    visible.forEach(n => {
+        const li  = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dropdown-item';
+        btn.textContent = n.column;
+        btn.dataset.col = n.column;
+        btn.addEventListener('click', () => selectNullColumn(n.column));
+        li.appendChild(btn);
+        menu.appendChild(li);
+    });
+
+    if (!visible.length) resetNullPanel();
+}
+
+function selectNullColumn(colName) {
+    _currentNullCol = colName;
+    document.getElementById('nullColDropdownBtn').textContent = colName;
+
+    fetch('/nulls/column-stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ column: colName })
+    })
+    .then(r => r.json())
+    .then(stats => {
+        if (stats.error) { showErrorToast(stats.error); return; }
+
+        document.getElementById('nullColName').textContent = stats.column;
+        document.getElementById('nullColType').textContent = stats.dtype;
+        document.getElementById('nullColPct').textContent  = stats.pct + '%';
+        document.getElementById('nullColInfo').classList.remove('d-none');
+
+        window._nullColStats = stats;
+        enableNullButtons(stats);
+    })
+    .catch(err => showErrorToast('Erro ao carregar estatísticas: ' + err.message));
+}
+
+function refreshAfterNullAction(data) {
+    updateMetrics(data.metrics);
+    renderNullsDetail(data.nulls_detail);
+    renderDtypes(data.dtypes);
+
+    const firstBtn = document.querySelector('#nullColDropdownMenu .dropdown-item');
+    if (firstBtn) {
+        selectNullColumn(firstBtn.dataset.col);
+    } else {
+        resetNullPanel();
+    }
+}
+
+// Stat buttons: preenchem o input com o valor calculado
+document.getElementById('nullBtnModa').addEventListener('click', () => {
+    const val = window._nullColStats?.mode;
+    if (val != null) document.getElementById('nullImputeValue').value = val;
+});
+document.getElementById('nullBtnMedia').addEventListener('click', () => {
+    const val = window._nullColStats?.mean;
+    if (val != null) document.getElementById('nullImputeValue').value = val;
+});
+document.getElementById('nullBtnMediana').addEventListener('click', () => {
+    const val = window._nullColStats?.median;
+    if (val != null) document.getElementById('nullImputeValue').value = val;
+});
+
+// OK: imputar
+document.getElementById('nullBtnOk').addEventListener('click', () => {
+    if (!_currentNullCol) return;
+    const col   = _currentNullCol;
+    const value = document.getElementById('nullImputeValue').value.trim();
+    if (!value) return;
+
+    fetch('/nulls/impute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ column: col, value })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            document.getElementById('nullImputeValue').value = '';
+            refreshAfterNullAction(data);
+            showSuccessToast(`Nulos de "${col}" imputados com "${value}".`);
+        } else {
+            showErrorToast(data.error);
+        }
+    })
+    .catch(err => showErrorToast('Erro na imputação: ' + err.message));
+});
+
+// Remover linhas
+document.getElementById('nullBtnDropRows').addEventListener('click', () => {
+    if (!_currentNullCol) return;
+    const col = _currentNullCol;
+
+    fetch('/nulls/drop-rows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ column: col })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            refreshAfterNullAction(data);
+            showSuccessToast(`Linhas com nulos em "${col}" removidas.`);
+        } else {
+            showErrorToast(data.error);
+        }
+    })
+    .catch(err => showErrorToast('Erro ao remover linhas: ' + err.message));
+});
+
+// Remover coluna
+document.getElementById('nullBtnDropCol').addEventListener('click', () => {
+    if (!_currentNullCol) return;
+    const col = _currentNullCol;
+
+    fetch('/nulls/drop-column', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ column: col })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            refreshAfterNullAction(data);
+            showSuccessToast(`Coluna "${col}" removida.`);
+        } else {
+            showErrorToast(data.error);
+        }
+    })
+    .catch(err => showErrorToast('Erro ao remover coluna: ' + err.message));
+});
+
+// Ignorar: marca como ignorada e passa para a próxima
+document.getElementById('nullBtnIgnore').addEventListener('click', () => {
+    if (!_currentNullCol) return;
+    _ignoredNullCols.add(_currentNullCol);
+
+    const menu = document.getElementById('nullColDropdownMenu');
+    menu.querySelectorAll('.dropdown-item').forEach(btn => {
+        if (btn.dataset.col === _currentNullCol) btn.parentElement.remove();
+    });
+
+    const nextBtn = menu.querySelector('.dropdown-item');
+    if (nextBtn) {
+        selectNullColumn(nextBtn.dataset.col);
+    } else {
+        resetNullPanel();
+    }
+});
+
+// Atualização IRT: tipo mudou via cast-column → atualiza badge e re-busca stats
+document.addEventListener('dtype:changed', (e) => {
+    if (_currentNullCol !== e.detail.column) return;
+    document.getElementById('nullColType').textContent = e.detail.newDtype;
+    selectNullColumn(_currentNullCol);
+});

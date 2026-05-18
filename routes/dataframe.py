@@ -50,6 +50,11 @@ def cast_column():
     dtype  = data.get('dtype')
     try:
         new_dtype = data_manager.cast_column(column, dtype)
-        return jsonify({"ok": True, "new_dtype": new_dtype})
+        return jsonify({
+            "ok":           True,
+            "new_dtype":    new_dtype,
+            "metrics":      data_manager.get_metrics(),
+            "nulls_detail": data_manager.get_nulls_detail(),
+        })
     except ValueError as e:
         return jsonify({"error": str(e)}), 400

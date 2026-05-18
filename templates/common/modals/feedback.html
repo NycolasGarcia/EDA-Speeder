@@ -1,0 +1,32 @@
+<!-- TOAST DE FEEDBACK (sucesso / erro) -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100">
+
+    <div id="successToast"
+         class="toast align-items-center text-bg-success border-0"
+         role="alert" aria-live="assertive" aria-atomic="true"
+         data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                <span id="successToastMsg"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+    </div>
+
+    <div id="errorToast"
+         class="toast align-items-center text-bg-danger border-0"
+         role="alert" aria-live="assertive" aria-atomic="true"
+         data-bs-autohide="false">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-x-circle-fill me-1"></i>
+                <span id="errorToastMsg"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+    </div>
+
+</div>

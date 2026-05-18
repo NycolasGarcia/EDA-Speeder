@@ -143,6 +143,52 @@ class DataManager:
         except Exception as e:
             raise ValueError(str(e))
 
+    def get_column_null_stats(self, column):
+        series = self.df[column]
+        rows   = len(self.df)
+        count  = int(series.isnull().sum())
+        result = {
+            "column": column,
+            "dtype":  str(series.dtype),
+            "count":  count,
+            "pct":    round(count / rows * 100, 2) if rows else 0,
+            "mode":   None,
+            "mean":   None,
+            "median": None,
+        }
+        non_null = series.dropna()
+        if len(non_null):
+            try:
+                mode_vals   = non_null.mode()
+                result["mode"] = str(mode_vals.iloc[0]) if len(mode_vals) else None
+            except Exception:
+                pass
+            if pd.api.types.is_numeric_dtype(series):
+                try:
+                    result["mean"]   = round(float(non_null.mean()), 4)
+                    result["median"] = round(float(non_null.median()), 4)
+                except Exception:
+                    pass
+        return result
+
+    def impute_column(self, column, value):
+        series = self.df[column]
+        if pd.api.types.is_numeric_dtype(series):
+            try:
+                value = float(value)
+            except ValueError:
+                raise ValueError(f"Valor '{value}' não é numérico para a coluna '{column}'")
+        self.df[column]   = series.fillna(value)
+        self.has_changes  = True
+
+    def drop_null_rows(self, column):
+        self.df          = self.df.dropna(subset=[column]).reset_index(drop=True)
+        self.has_changes = True
+
+    def drop_column(self, column):
+        self.df          = self.df.drop(columns=[column])
+        self.has_changes = True
+
     # ── Controle de estado ─────────────────────────────────────────────────────
 
     def mark_changed(self):
